@@ -137,9 +137,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 })
                 if (found) {
+                    console.log("check");
                     alert(`The game name ${gamename} has already been taken. Try a different game.`);
                 } else { // Create new game
                     //Initialize game variables
+                    console.log("test");
                     created = Date.now();
                     maxplayers = 10;
                     status = "Waiting for more players";
@@ -205,80 +207,22 @@ document.addEventListener('DOMContentLoaded', () => {
                     joined = true;
 
                     //Set ready listener: reset ready
-                    readyDB.on("value", (dataSnapshot) => {
-                        readyDB.set(true);
-                    })
+                    readyDB.on("value", readyFunction);
 
                     //Set gamegoing listener: update gamegoing
-                    gameDB.child("gamegoing").on("value", (dataSnapshot) => {
-                        gamegoing = dataSnapshot.val();
-                    })
+                    gameDB.child("gamegoing").on("value", gamegoingFunction)
 
                     //Set card listener: update cards and update()
-                    cardsDB.on("value", (dataSnapshot) => {
-                        cards = Object.values(dataSnapshot.val());
-                        update();
-                    })
+                    cardsDB.on("value", cardsFunction);
 
                     //Set discard listener: Update players, extradraw, drawcounter, playerorder, currentplayer, and topCard, then udpate()
-                    gameDB.child("discarddeck").on("value", (dataSnapshot) => {
-                        gameDB.orderByKey().once("value", function (snapshot) {
-                            players = Object.values(snapshot.child("players").val());
-                            extradraw = snapshot.child("extradraw").val();
-                            drawcounter = snapshot.child("drawcounter").val();
-                            playerorder = snapshot.child("playerorder").val();
-                            currentplayer = snapshot.child("currentplayer").val();
-                        })
-                        deck = Object.values(dataSnapshot.val());
-                        topCard = deck[deck.length - 1];
-                        winnerData = checkForWinner();
-                        if (winnerData["isWinner"]) {
-                            gameDB.child("isWinner").set(winnerData["isWinner"]);
-                            gameDB.child("winner").set(winnerData["winner"]);
-                            isWinner = winnerData["isWinner"];
-                            winner = winnerData["winner"];
-                        }
-                        update();
-                    })
+                    gameDB.child("discarddeck").on("value", discarddeckFunction);
 
                     //Set ending listener: update ending and all vars, then update()
-                    gameDB.child("ending").on("value", (dataSnapshot) => {
-                        if (dataSnapshot.val() === true) {
-                            readyDB = firebase.database().ref("games");
-                            myDB = firebase.database().ref("games");
-                            cardsDB = firebase.database().ref("games");
-                            gameDB = firebase.database().ref("games");
-                            myGamesDB = firebase.database().ref("games").child("gameObjects");
-                            gamename = "";
-                            created = "";
-                            maxplayers = 10;
-                            status = ""
-                            username = ""
-                            ready = true;
-                            cards = [];
-                            drawcounter = 1;
-                            topCard = {};
-                            playerorder = [0];
-                            currentplayer = 0;
-                            ending = false;
-                            numplayers = 1;
-                            gamegoing = false;
-                            extradraw = false;
-                            playerIndex = 0;
-                            leftIndex = 0;
-                            waiting = true;
-                            joined = false;
-                            update();
-                        }
-                    })
+                    gameDB.child("ending").on("value", endingFunction);
 
                     //Set draw listener: update players, then update()
-                    gameDB.child("drawdeck").on("value", (dataSnapshot) => {
-                        gameDB.orderByKey().once("value", function (snapshot) {
-                            players = Object.values(snapshot.child("players").val());
-                            update();
-                        })
-                    })
+                    gameDB.child("drawdeck").on("value", drawdeckFunction);
                 }
             })
         }
@@ -346,81 +290,22 @@ document.addEventListener('DOMContentLoaded', () => {
                                     joined = true;
 
                                     //Set ready listener: reset ready
-                                    readyDB.on("value", (dataSnapshot) => {
-                                        readyDB.set(true);
-                                    })
+                                    readyDB.on("value", readyFunction);
 
                                     //Set gamegoing listener: update gamegoing
-                                    gameDB.child("gamegoing").on("value", (dataSnapshot) => {
-                                        gamegoing = dataSnapshot.val();
-                                    })
+                                    gameDB.child("gamegoing").on("value", gamegoingFunction)
 
                                     //Set cards listener: update cards and update()
-                                    cardsDB.on("value", (dataSnapshot) => {
-                                        cards = Object.values(dataSnapshot.val());
-                                        update();
-                                    })
+                                    cardsDB.on("value", cardsFunction);
 
                                     //Set ending listner: update ending and all vars, then update()
-                                    gameDB.child("ending").on("value", (dataSnapshot) => {
-                                        if (dataSnapshot.val() === true) {
-                                            readyDB = firebase.database().ref("games");
-                                            myDB = firebase.database().ref("games");
-                                            cardsDB = firebase.database().ref("games");
-                                            gameDB = firebase.database().ref("games");
-                                            myGamesDB = firebase.database().ref("games").child("gameObjects");
-                                            gamename = "";
-                                            created = "";
-                                            maxplayers = 10;
-                                            status = ""
-                                            username = ""
-                                            ready = true;
-                                            cards = [];
-                                            drawcounter = 1;
-                                            topCard = {};
-                                            playerorder = [0];
-                                            currentplayer = 0;
-                                            ending = false;
-                                            numplayers = 1;
-                                            gamegoing = false;
-                                            extradraw = false;
-                                            playerIndex = 0;
-                                            leftIndex = 0;
-                                            waiting = true;
-                                            joined = false;
-                                            players = [];
-                                            update();
-                                        }
-                                    })
+                                    gameDB.child("ending").on("value", endingFunction);
 
                                     //Set discarddeck listener: update players, extradraw, drawcounter, playerorder, currentplayer, and topCard, then update()
-                                    gameDB.child("discarddeck").on("value", (dataSnapshot) => {
-                                        gameDB.orderByKey().once("value", function (snapshot) {
-                                            players = Object.values(snapshot.child("players").val());
-                                            extradraw = snapshot.child("extradraw").val();
-                                            drawcounter = snapshot.child("drawcounter").val();
-                                            playerorder = snapshot.child("playerorder").val();
-                                            currentplayer = snapshot.child("currentplayer").val();
-                                        })
-                                        deck = Object.values(dataSnapshot.val());
-                                        topCard = deck[deck.length - 1]; 
-                                        winnerData = checkForWinner();
-                                        if (winnerData["isWinner"]) {
-                                            gameDB.child("isWinner").set(winnerData["isWinner"]);
-                                            gameDB.child("winner").set(winnerData["winner"]);
-                                            isWinner = winnerData["isWinner"];
-                                            winner = winnerData["winner"];
-                                        }
-                                        update();
-                                    })
+                                    gameDB.child("discarddeck").on("value", discarddeckFunction);
 
                                     //Set drawdeck listener: update players, then update()
-                                    gameDB.child("drawdeck").on("value", (dataSnapshot) => {
-                                        gameDB.orderByKey().once("value", function (snapshot) {
-                                            players = Object.values(snapshot.child("players").val());
-                                            update();
-                                        })
-                                    })
+                                    gameDB.child("drawdeck").on("value", drawdeckFunction);
                                 } else {
                                     alert(`Couldn't join game ${gamename} because they already have the maximum number of players`);
                                 }
@@ -468,80 +353,22 @@ document.addEventListener('DOMContentLoaded', () => {
                                         joined = true;
 
                                         //set ready listener: reset ready
-                                        readyDB.on("value", (dataSnapshot) => {
-                                            readyDB.set(true);
-                                        })
+                                        readyDB.on("value", readyFunction);
 
                                         //Set gamegoing listener: update gamegoing
-                                        gameDB.child("gamegoing").on("value", (dataSnapshot) => {
-                                            gamegoing = dataSnapshot.val();
-                                        })
+                                        gameDB.child("gamegoing").on("value", gamegoingFunction)
 
                                         //set cards listener: update cards and update()
-                                        cardsDB.on("value", (dataSnapshot) => {
-                                            cards = Object.values(dataSnapshot.val());
-                                            update();
-                                        })
+                                        cardsDB.on("value", cardsFunction);
 
                                         //Set ending listner: update ending and all vars, then update()
-                                        gameDB.child("ending").on("value", (dataSnapshot) => {
-                                            if (dataSnapshot.val() === true) {
-                                                readyDB = firebase.database().ref("games");
-                                                myDB = firebase.database().ref("games");
-                                                cardsDB = firebase.database().ref("games");
-                                                gameDB = firebase.database().ref("games");
-                                                myGamesDB = firebase.database().ref("games").child("gameObjects");
-                                                gamename = "";
-                                                created = "";
-                                                maxplayers = 10;
-                                                status = ""
-                                                username = ""
-                                                ready = true;
-                                                cards = [];
-                                                drawcounter = 1;
-                                                topCard = {};
-                                                playerorder = [0];
-                                                currentplayer = 0;
-                                                ending = false;
-                                                numplayers = 1;
-                                                gamegoing = false;
-                                                extradraw = false;
-                                                playerIndex = 0;
-                                                leftIndex = 0;
-                                                waiting = true;
-                                                joined = false;
-                                                update();
-                                            }
-                                        })
+                                        gameDB.child("ending").on("value", endingFunction);
 
                                         //set discarddeck listener: update players, extradraw, drawcounter, playercounter, playerorder, currentplayer, topCard, and update()
-                                        gameDB.child("discarddeck").on("value", (dataSnapshot) => {
-                                            gameDB.orderByKey().once("value", function (snapshot) {
-                                                players = Object.values(snapshot.child("players").val());
-                                                extradraw = snapshot.child("extradraw").val();
-                                                drawcounter = snapshot.child("drawcounter").val();
-                                                playerorder = snapshot.child("playerorder").val();
-                                                currentplayer = snapshot.child("currentplayer").val();
-                                            })
-                                            deck = Object.values(dataSnapshot.val());
-                                            topCard = deck[deck.length - 1];
-                                            winnerData = checkForWinner();
-                                            if (winnerData["isWinner"]) {
-                                                gameDB.child("isWinner").set(winnerData["isWinner"]);
-                                                gameDB.child("winner").set(winnerData["winner"]);
-                                                isWinner = winnerData["isWinner"];
-                                                winner = winnerData["winner"];
-                                            }
-                                            update();
-                                        })
+                                        gameDB.child("discarddeck").on("value", discarddeckFunction);
 
                                         //set drawdeck listener: update players and update()
-                                        gameDB.child("drawdeck").on("value", (dataSnapshot) => {
-                                            gameDB.orderByKey().once("value", function (snapshot) {
-                                                players = Object.values(snapshot.child("players").val());
-                                                update();
-                                            })
-                                        })
+                                        gameDB.child("drawdeck").on("value", drawdeckFunction);
                                     } else {
                                         playerActive = true;
                                     }
@@ -1187,5 +1014,77 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
         return { "isWinner": isWinner, "winner": winner };
+    }
+
+    gamegoingFunction = function (dataSnapshot) {
+        gamegoing = dataSnapshot.val();
+    }
+    readyFunction = function (dataSnapshot) {
+        readyDB.set(true);
+    }
+    drawdeckFunction = function (dataSnapshot) {
+        gameDB.orderByKey().once("value", function (snapshot) {
+            players = Object.values(snapshot.child("players").val());
+            update();
+        });
+    }
+    discarddeckFunction = function (dataSnapshot) {
+        gameDB.orderByKey().once("value", function (snapshot) {
+            players = Object.values(snapshot.child("players").val());
+            extradraw = snapshot.child("extradraw").val();
+            drawcounter = snapshot.child("drawcounter").val();
+            playerorder = snapshot.child("playerorder").val();
+            currentplayer = snapshot.child("currentplayer").val();
+        })
+        deck = Object.values(dataSnapshot.val());
+        topCard = deck[deck.length - 1];
+        winnerData = checkForWinner();
+        if (winnerData["isWinner"]) {
+            gameDB.child("isWinner").set(winnerData["isWinner"]);
+            gameDB.child("winner").set(winnerData["winner"]);
+            isWinner = winnerData["isWinner"];
+            winner = winnerData["winner"];
+        }
+        update();
+    }
+    cardsFunction = function (dataSnapshot) {
+        cards = Object.values(dataSnapshot.val());
+        update();
+    }
+
+    endingFunction = function (dataSnapshot) {
+        if (dataSnapshot.val() === true) {
+            readyDB.off("value", readyFunction);
+            gameDB.child("gamegoing").off("value", gamegoingFunction)
+            cardsDB.off("value", cardsFunction);
+            gameDB.child("discarddeck").off("value", discarddeckFunction);
+            gameDB.child("drawdeck").on("value", drawdeckFunction);
+            gameDB.child("ending").on("value", endingFunction);
+            readyDB = firebase.database().ref("games");
+            myDB = firebase.database().ref("games");
+            cardsDB = firebase.database().ref("games");
+            gameDB = firebase.database().ref("games");
+            myGamesDB = firebase.database().ref("games").child("gameObjects");
+            gamename = "";
+            created = "";
+            maxplayers = 10;
+            status = ""
+            username = ""
+            ready = true;
+            cards = [];
+            drawcounter = 1;
+            topCard = {};
+            playerorder = [0];
+            currentplayer = 0;
+            ending = false;
+            numplayers = 1;
+            gamegoing = false;
+            extradraw = false;
+            playerIndex = 0;
+            leftIndex = 0;
+            waiting = true;
+            joined = false;
+            update();
+        }
     }
 });
