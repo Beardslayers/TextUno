@@ -1058,8 +1058,8 @@ document.addEventListener('DOMContentLoaded', () => {
             gameDB.child("gamegoing").off("value", gamegoingFunction)
             cardsDB.off("value", cardsFunction);
             gameDB.child("discarddeck").off("value", discarddeckFunction);
-            gameDB.child("drawdeck").on("value", drawdeckFunction);
-            gameDB.child("ending").on("value", endingFunction);
+            gameDB.child("drawdeck").off("value", drawdeckFunction);
+            gameDB.child("ending").off("value", endingFunction);
             readyDB = firebase.database().ref("games");
             myDB = firebase.database().ref("games");
             cardsDB = firebase.database().ref("games");
